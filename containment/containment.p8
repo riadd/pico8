@@ -7,9 +7,11 @@ move_speed=2 // on which frame to run
 city={} zones={} cur_zone={}
 
 function _init()
- px=8 py=8 dx=1 dy=0
- build = false
+ px=8 py=8 
+ dx=1 dy=0
+ build=false
  gen_city()
+ new_zone=false
 end
 
 function gen_city()
@@ -82,36 +84,52 @@ function draw_block(block)
 end
 
 function _update60()
-	frame+=1
+		frame+=1
 	
-	if (frame % move_speed > 0) return
+		if (frame % move_speed > 0) return
+		
+		if not build then
+    cur_zone={}
+  end
 	
- if px%8==0 and py%8==0 then
-  dx=0 dy=0
+  // only update at corners
+  if px%8==0 and py%8==0 then
+    dx=0 dy=0
 
-  if btn(⬅️) then
-   dx=-1 dy=0
-  elseif btn(➡️) then
-   dx=1 dy=0
-  elseif btn(⬆️) then
-   dy=-1 dx=0
-  elseif btn(⬇️) then
-   dy=1 dx=0
+    if btn(⬅️) then
+     	dx=-1 dy=0
+    elseif btn(➡️) then
+     	dx=1 dy=0
+    elseif btn(⬆️) then
+     	dy=-1 dx=0
+    elseif btn(⬇️) then
+     	dy=1 dx=0
+    end
+    
+    if new_zone then
+    	 pos={px,py}
+    	 ci=0
+      for p in all(cur_zone) do
+        if ci<#cur_zone and p[1]==pos[1] and p[2]==pos[2] then
+          cur_zone={}
+        end
+        ci+=1
+      end
+      
+     	add(cur_zone,pos)
+      new_zone=false
+    end
+	 end
+  
+  px = mid(0,px+dx,124)
+  py = mid(0,py+dy,124)
+  
+  if dx!=0 or dy!=0 then
+    new_zone=true
   end
-  
-  if not build then
-  	cur_zone={}
-  else
-   pos={px,py}
-   add(cur_zone,pos)
-  end
- end
-  
- px = mid(0,px+dx,124)
- py = mid(0,py+dy,124)
-  
- build = btn(❎)
- foreach(city,update_block)
+   
+  build = btn(❎)
+  foreach(city,update_block)
 end
 
 function _draw()
@@ -144,7 +162,7 @@ function _draw()
  	end
 	end
   
- print(px, 5, 112)
+ print(#cur_zone, 5, 112)
  print(py, 5, 120)
   
  if build then
