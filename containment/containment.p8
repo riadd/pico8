@@ -2,7 +2,8 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 city_w=14 city_h=12 
-inf_speed=12 frame=0
+inf_speed=6 frame=0
+move_speed=2 // on which frame to run
 city={} zones={} cur_zone={}
 
 function _init()
@@ -80,8 +81,10 @@ function draw_block(block)
  end
 end
 
-function _update()
+function _update60()
 	frame+=1
+	
+	if (frame % move_speed > 0) return
 	
  if px%8==0 and py%8==0 then
   dx=0 dy=0
@@ -113,7 +116,10 @@ end
 
 function _draw()
  cls()
- rect(1,1,127,127)
+ 
+ col = 7
+ if (build) col = 8
+ rect(1,1,127,127,col) // border
   
  ox=3 oy=3
  
